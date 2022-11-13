@@ -38,10 +38,15 @@ struct LinkMap {
         case none, obj, sec, sym, dead
         }
         guard
-            let data = FileManager.default.contents(atPath: path),
-            let contents = String(data: data, encoding: .isoLatin1)
+            let data = FileManager.default.contents(atPath: path)
+            // may include none-utf8 char
+            ,let contents = String(data: data, encoding: .macOSRoman)
         else { throw Err.invalidPath }
-        // may include none-utf8 char
+        // let contents = String(data: data, encoding: .utf8) ??
+        //     String.init(unsafeUninitializedCapacity: data.count, initializingUTF8With: {
+        //                     _ = $0.initialize(from: data)
+        //                     return data.count
+        //                 })
 
         var section = Section.none
         contents.enumerateLines { (line, stop) in
@@ -64,7 +69,6 @@ struct LinkMap {
             case .sym: SymSection()
             default: break
             }
-
             func ObjSection() {
                 guard let (index, file) = extractIndexAndPath(line) else {
                     Logging.debug("section extract fail \(line)")
@@ -73,15 +77,14 @@ struct LinkMap {
                 indexes[index] = ObjectFile(index: index, path: file, symbols: [:])
             }
             func SymSection() {
-                // line.split(separator: "\t")
-                let parts = line.split(separator: "\t")
+                let parts = line.split(separator: "\t", maxSplits: 2)
                 func log() {
                     if !line.isEmpty { // obj section end with a empty line
                         Logging.debug("obj extract fail \(line)")
                     }
                 }
                 guard parts.count == 3 else { log() ;return }
-                guard let (index, sym) = extractIndexAndPath((String(parts[2]))) else { log() ;return }
+                guard let (index, sym) = extractIndexAndPath((parts[2])) else { log() ;return }
                 guard let start = Int.from(parts[0]), let size = Int.from(parts[1]) else { log() ;return }
                 indexes[index]?.symbols[sym] = .init(start: start, size: size, name: sym)
             }
@@ -107,8 +110,8 @@ struct LinkMap {
         guard
             line.first == "[",
             let sep = line.firstIndex(of: "]"),
-            let index = Int(line[line.index(offset: 1)..<sep].trimmingCharacters(in: .whitespaces)),
-            case let contents = line[line.index(sep, offsetBy: 2)...]
+            let index = Int.from(line[line.index(offset: 1)..<sep]),
+            case let contents = line.suffix(from: line.index(sep, offsetBy: 2))
         else { return nil }
         return (index, String(contents))
     }
@@ -122,10 +125,12 @@ extension StringProtocol {
 
 extension Int {
     static func from<T: StringProtocol>(_ from: T) -> Int? {
-        if from.starts(with: "0x") {
-            return Int(from[from.index(from.startIndex, offsetBy: 2)...], radix: 16)
+        return from.withCString { (p) -> Int? in
+            var end: UnsafeMutablePointer<CChar>?
+            let v = strtoull(p, &end, 0)
+            if Int(bitPattern: p) == Int(bitPattern: end) { return nil }
+            return Int(truncatingIfNeeded: v)
         }
-        return Int(from)
     }
 }
 
