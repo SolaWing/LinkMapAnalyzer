@@ -15,26 +15,24 @@ class AppState: ObservableObject {
             Logging.info("update path at \(selectedFile)")
             manualChoose.insert(selectedFile, at: 0)
             manualChoose = manualChoose.unique()
-            Task {
-                let loading = Task.detached { [selectedFile] in
-                    let begin = CACurrentMediaTime()
-                    let linkmap = try LinkMap.analyze(path: selectedFile)
-                    let anaEnd = CACurrentMediaTime()
-                    let sizeInfo = AppState.updateOutput(linkmap: linkmap)
-                    Logging.info("updated path at \(URL(fileURLWithPath: selectedFile).lastPathComponent): analyze: \(anaEnd - begin)s, output: \(CACurrentMediaTime() - anaEnd)")
-                    return (linkmap, sizeInfo)
-                }
-                tip = ("loading", .gray)
-                self.loading = { loading.cancel() }
+            let loading = Task { [selectedFile] in
                 do {
-                    (linkmap, sizeInfo) = try await loading.value
+                    let begin = CACurrentMediaTime()
+                    let linkmap = try await LinkMap.analyze(path: selectedFile)
+                    if Task.isCancelled { return }
+                    let anaEnd = CACurrentMediaTime()
+                    let sizeInfo = await AppState.updateOutput(linkmap: linkmap)
+                    Logging.info("updated path at \(URL(fileURLWithPath: selectedFile).lastPathComponent): analyze: \(anaEnd - begin)s, output: \(CACurrentMediaTime() - anaEnd)")
+                    (self.linkmap, self.sizeInfo) = (linkmap, sizeInfo)
                     tip = nil
                 } catch {
-                    if loading.isCancelled { return }
+                    if Task.isCancelled { return }
                     tip = (error.localizedDescription, .red)
                 }
                 self.loading = nil
             }
+            tip = ("loading", .gray)
+            self.loading = { loading.cancel() }
         }
     }
     @Published var loading: (() -> Void)? {
@@ -56,7 +54,7 @@ class AppState: ObservableObject {
         }
     }
 
-    nonisolated static func updateOutput(linkmap: LinkMap) -> ([Row], String) {
+    nonisolated static func updateOutput(linkmap: LinkMap) async -> ([Row], String) {
         let rows = linkmap.indexes.values
             .map { Row(id: $0.path, size: $0.total, name: URL(fileURLWithPath: $0.path).lastPathComponent) }
             .sorted(key: { -$0.size })

@@ -32,7 +32,7 @@ struct LinkMap {
             return []
         }
     }
-    public static func analyze(path: String) throws -> LinkMap {
+    public static func analyze(path: String) async throws -> LinkMap {
         var indexes: [Int: ObjectFile] = [:]
         enum Section {
         case none, obj, sec, sym, dead
