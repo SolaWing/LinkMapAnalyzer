@@ -146,4 +146,8 @@ extension Sequence {
         return self.map { (key($0), $0) }.sorted(by: { $0.0 < $1.0 })
             .map { $0.1 }
     }
+    func unique() -> [Element] where Element: Hashable {
+        var s = Set<Element>()
+        return filter { s.insert($0).inserted }
+    }
 }

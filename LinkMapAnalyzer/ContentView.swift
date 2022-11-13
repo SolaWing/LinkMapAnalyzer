@@ -14,7 +14,7 @@ struct ContentView: View {
         let _ = Logging.debug("load ContentView")
         VStack {
             Picker("选择LinkMap文件。你也可以拖放文件", selection: $app.selectedFile) {
-                ForEach(app.availableLinkMapFiles, id: \.self) { (path) in
+                ForEach(app.fileToBeSelect, id: \.self) { (path) in
                     Text(path)
                 }
             }

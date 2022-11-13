@@ -11,35 +11,39 @@ import SwiftUI
 class AppState: ObservableObject {
     var selectedFile: String = "" {
         didSet {
-                Logging.info("update path at \(selectedFile)")
-                Task {
-                    let loading = Task.detached { [selectedFile] in
-                        let begin = CACurrentMediaTime()
-                        let linkmap = try LinkMap.analyze(path: selectedFile)
-                        let anaEnd = CACurrentMediaTime()
-                        let sizeInfo = AppState.updateOutput(linkmap: linkmap)
-                        Logging.info("updated path at \(URL(fileURLWithPath: selectedFile).lastPathComponent): analyze: \(anaEnd - begin)s, output: \(CACurrentMediaTime() - anaEnd)")
-                        return (linkmap, sizeInfo)
-                    }
-                    tip = ("loading", .gray)
-                    self.loading = { loading.cancel() }
-                    do {
-                        (linkmap, sizeInfo) = try await loading.value
-                        tip = nil
-                    } catch {
-                        if loading.isCancelled { return }
-                        tip = (error.localizedDescription, .red)
-                    }
-                    self.loading = nil
+            if selectedFile == oldValue { return }
+            Logging.info("update path at \(selectedFile)")
+            manualChoose.insert(selectedFile, at: 0)
+            Task {
+                let loading = Task.detached { [selectedFile] in
+                    let begin = CACurrentMediaTime()
+                    let linkmap = try LinkMap.analyze(path: selectedFile)
+                    let anaEnd = CACurrentMediaTime()
+                    let sizeInfo = AppState.updateOutput(linkmap: linkmap)
+                    Logging.info("updated path at \(URL(fileURLWithPath: selectedFile).lastPathComponent): analyze: \(anaEnd - begin)s, output: \(CACurrentMediaTime() - anaEnd)")
+                    return (linkmap, sizeInfo)
                 }
+                tip = ("loading", .gray)
+                self.loading = { loading.cancel() }
+                do {
+                    (linkmap, sizeInfo) = try await loading.value
+                    tip = nil
+                } catch {
+                    if loading.isCancelled { return }
+                    tip = (error.localizedDescription, .red)
+                }
+                self.loading = nil
+            }
         }
     }
     @Published var loading: (() -> Void)? {
         willSet { loading?() }
     }
     var tip: (String, Color)?
+    var manualChoose: [String] = []
+    var fileToBeSelect: [String] { (manualChoose + LinkMap.availableLinkMapFiles()).unique() }
+
     var linkmap: LinkMap?
-    lazy var availableLinkMapFiles = LinkMap.availableLinkMapFiles()
     var sizeInfo: ([Row], String)? // row, summary
     struct Row: Identifiable {
         // var id = UUID() // avoid diff and animation crash
