@@ -44,7 +44,8 @@ struct LinkMap {
         // may include none-utf8 char
 
         var section = Section.none
-        for line in contents.components(separatedBy: "\n") {
+        contents.enumerateLines { (line, stop) in
+            if Task.isCancelled { stop = true; return }
             if line.first == "#" { // read section
                 if line.starts(with: "# Object files:") {
                   section = .obj
@@ -54,8 +55,9 @@ struct LinkMap {
                   section = .sym
                 } else if line.starts(with: "# Dead Stripped Symbols:") {
                   section = .dead
+                  stop = true // TODO: not implement
                 }
-                continue
+                return
             }
             switch section {
             case .obj: ObjSection()
@@ -84,6 +86,7 @@ struct LinkMap {
                 indexes[index]?.symbols[sym] = .init(start: start, size: size, name: sym)
             }
         }
+        try Task.checkCancellation()
         if section == .none { throw Err.invalidPath }
         return .init(path: path, indexes: indexes)
     }

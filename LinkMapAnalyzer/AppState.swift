@@ -7,18 +7,35 @@
 
 import SwiftUI
 
+@MainActor
 class AppState: ObservableObject {
-    @Published var selectedFile: String = "" {
+    var selectedFile: String = "" {
         didSet {
-            tip = nil
-            do {
                 Logging.info("update path at \(selectedFile)")
-                linkmap = try LinkMap.analyze(path: selectedFile)
-                updateOutput()
-            } catch {
-                tip = (error.localizedDescription, .red)
-            }
+                Task {
+                    let loading = Task.detached { [selectedFile] in
+                        let begin = CACurrentMediaTime()
+                        let linkmap = try LinkMap.analyze(path: selectedFile)
+                        let anaEnd = CACurrentMediaTime()
+                        let sizeInfo = AppState.updateOutput(linkmap: linkmap)
+                        Logging.info("updated path at \(URL(fileURLWithPath: selectedFile).lastPathComponent): analyze: \(anaEnd - begin)s, output: \(CACurrentMediaTime() - anaEnd)")
+                        return (linkmap, sizeInfo)
+                    }
+                    tip = ("loading", .gray)
+                    self.loading = { loading.cancel() }
+                    do {
+                        (linkmap, sizeInfo) = try await loading.value
+                        tip = nil
+                    } catch {
+                        if loading.isCancelled { return }
+                        tip = (error.localizedDescription, .red)
+                    }
+                    self.loading = nil
+                }
         }
+    }
+    @Published var loading: (() -> Void)? {
+        willSet { loading?() }
     }
     var tip: (String, Color)?
     var linkmap: LinkMap?
@@ -34,17 +51,17 @@ class AppState: ObservableObject {
         }
     }
 
-    func updateOutput() {
-        guard let linkmap else { sizeInfo = nil; return }
+    nonisolated static func updateOutput(linkmap: LinkMap) -> ([Row], String) {
         let rows = linkmap.indexes.values
             .map { Row(id: $0.path, size: $0.total, name: URL(fileURLWithPath: $0.path).lastPathComponent) }
             .sorted(key: { -$0.size })
         let total = rows.map(\.size).reduce(0, +)
-        sizeInfo = (rows, "总大小：\(AppState.format(num: total))")
+        let sizeInfo = (rows, "总大小：\(AppState.format(num: total))")
         Logging.debug("updateOutput")
+        return sizeInfo
     }
 
-    static func format(num: Int) -> String {
+    nonisolated static func format(num: Int) -> String {
         if num < 1024 { // 4KB
           return "\(num) B"
         }

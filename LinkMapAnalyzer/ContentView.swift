@@ -18,7 +18,10 @@ struct ContentView: View {
                     Text(path)
                 }
             }
-            if let tip = app.tip { Text(tip.0).foregroundColor(tip.1) }
+            HStack {
+                if app.loading != nil { ProgressView().scaleEffect(0.5) }
+                if let tip = app.tip { Text(tip.0).foregroundColor(tip.1) }
+            }
             if let sizeInfo = app.sizeInfo {
                 let _ = Logging.debug("load sizeInfo")
                 Table(sizeInfo.0) {
@@ -28,7 +31,14 @@ struct ContentView: View {
                     }
                 }.id(sizeInfo.1) // disable reuse table and force reload to avoid diff bug
                 .frame(minHeight: 240)
+                .padding(.top, 8)
                 Text(sizeInfo.1)
+            } else {
+                Text("""
+                     使用方式：
+                     1. XCode -> Project -> Build Settings -> Write Link Map File = yes
+                     2. choose LinkMap and start analyze
+                     """)
             }
         }
         .padding()
