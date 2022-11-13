@@ -14,6 +14,7 @@ class AppState: ObservableObject {
             if selectedFile == oldValue { return }
             Logging.info("update path at \(selectedFile)")
             manualChoose.insert(selectedFile, at: 0)
+            manualChoose = manualChoose.unique()
             Task {
                 let loading = Task.detached { [selectedFile] in
                     let begin = CACurrentMediaTime()
