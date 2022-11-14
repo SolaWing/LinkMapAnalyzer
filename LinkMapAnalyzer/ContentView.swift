@@ -35,12 +35,12 @@ struct ContentView: View {
                 Spacer()
             }.frame(height: 22)
             if let sizeInfo = app.sizeInfo {
-                SizeTable(data: sizeInfo).frame(minHeight: 240)
+                SizeTable(data: sizeInfo).equatable().frame(minHeight: 240)
                 Spacer()
                 Text(sizeInfo.summary)
             } else {
                 Text("""
-                     使用方式：
+                     Usage：
                      1. XCode -> Project -> Build Settings -> Write Link Map File = yes
                      2. choose LinkMap and start analyze
                      """)
@@ -73,12 +73,18 @@ struct SizeTable: View, Equatable {
     var data: AppState.SizeInfo
     var body: some View {
         let _ = Logging.debug("load SizeTable")
-        Table(data.rows) {
-            TableColumn("Size", value: \.sizeStr).width(max: 100)
-            TableColumn("Name") {
-                Text($0.name).truncationMode(.head)
-            }
-        }.id(data.updateTime) // disable reuse table and force reload to avoid diff bug
+        if data.category == .symbol {
+            Table(data.rows) {
+                TableColumn("Size", value: \.sizeStr).width(max: 100)
+                TableColumn("Name") { Text($0.name).truncationMode(.head) }
+                TableColumn("Lib") { Text($0.lib ?? "").truncationMode(.head) }
+            }.id(data.updateTime) // disable reuse table and force reload to avoid diff bug
+        } else {
+            Table(data.rows) {
+                TableColumn("Size", value: \.sizeStr).width(max: 100)
+                TableColumn("Name") { Text($0.name).truncationMode(.head) }
+            }.id(data.updateTime) // disable reuse table and force reload to avoid diff bug
+        }
     }
 }
 

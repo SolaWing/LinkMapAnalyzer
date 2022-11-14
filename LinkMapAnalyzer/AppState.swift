@@ -80,13 +80,19 @@ class AppState: ObservableObject {
 
     // MARK: Result
     var linkmap: LinkMap?
-    typealias SizeInfo = (rows: [Row], summary: String, updateTime: CFTimeInterval)
+    struct SizeInfo {
+        var rows: [Row]
+        var summary: String
+        var updateTime: CFTimeInterval
+        var category: Query.Category
+    }
     var sizeInfo: SizeInfo? // row, summary
     struct Row: Identifiable {
         // var id = UUID() // avoid diff and animation crash
         var id: String
         var size: Int
         var name: String
+        var lib: String?
         var sizeStr: String {
             AppState.format(num: size)
         }
@@ -103,8 +109,11 @@ class AppState: ObservableObject {
                 return Row(id: o.path, size: o.total, name: o.name)
             }
         case .symbol:
-            rows = objects.flatMap { $0.symbols.values }
-                .map { Row(id: $0.name, size: $0.size, name: $0.name) }
+            rows = objects.flatMap { o in
+                o.symbols.values.map { [lib = o.libraryName](s) in
+                    Row(id: s.name, size: s.size, name: s.name, lib: lib)
+                }
+            }
         case .library:
             rows = Dictionary(grouping: objects, by: { $0.libraryName }).map { k, a in
                 return Row(id: k, size: a.map(\.total).reduce(0,+), name: k)
@@ -115,7 +124,7 @@ class AppState: ObservableObject {
         }
         rows = rows.sorted(key: { -$0.size })
         let total = rows.map(\.size).reduce(0, +)
-        return (rows, "总大小：\(AppState.format(num: total))", begin)
+        return SizeInfo(rows: rows, summary: "总大小：\(AppState.format(num: total))", updateTime: begin, category: query.category)
     }
 
     nonisolated static func format(num: Int) -> String {
