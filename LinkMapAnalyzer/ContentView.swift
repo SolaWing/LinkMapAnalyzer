@@ -25,13 +25,18 @@ struct ContentView: View {
             }
             TextField("Query: ", text: $app.query.query)
             HStack {
+                Picker("Category By: ", selection: $app.query.category) {
+                    ForEach(AppState.Query.Category.allCases) {
+                        Text($0.rawValue.capitalized).tag($0)
+                    }
+                }.pickerStyle(.radioGroup).horizontalRadioGroupLayout()
                 if app.isLoading { ProgressView().scaleEffect(0.5) }
                 if let tip = app.tip { Text(tip.0).foregroundColor(tip.1) }
-            }
+                Spacer()
+            }.frame(height: 22)
             if let sizeInfo = app.sizeInfo {
-                let _ = Logging.debug("load sizeInfo")
                 Table(sizeInfo.0) {
-                    TableColumn("Size", value: \.sizeStr)
+                    TableColumn("Size", value: \.sizeStr).width(max: 100)
                     TableColumn("Name") {
                         Text($0.name).truncationMode(.head)
                     }

@@ -100,6 +100,13 @@ struct LinkMap {
 
         var total: Int { symbols.values.map(\.size).reduce(0, +) }
         var name: String { URL(fileURLWithPath: path).lastPathComponent }
+        var libraryName: String {
+            let name = self.name
+            if let index = name.firstIndex(of: "(") {
+                return String(name[..<index])
+            }
+            return name
+        }
     }
     struct Symbol {
         var start: Int
