@@ -35,16 +35,9 @@ struct ContentView: View {
                 Spacer()
             }.frame(height: 22)
             if let sizeInfo = app.sizeInfo {
-                Table(sizeInfo.0) {
-                    TableColumn("Size", value: \.sizeStr).width(max: 100)
-                    TableColumn("Name") {
-                        Text($0.name).truncationMode(.head)
-                    }
-                }.id(sizeInfo.1) // disable reuse table and force reload to avoid diff bug
-                .frame(minHeight: 240)
-                // .padding(.top, 8)
+                SizeTable(data: sizeInfo).frame(minHeight: 240)
                 Spacer()
-                Text(sizeInfo.1)
+                Text(sizeInfo.summary)
             } else {
                 Text("""
                      使用方式：
@@ -71,6 +64,24 @@ struct ContentView: View {
         }
     }
 }
+struct SizeTable: View, Equatable {
+    static func == (lhs: SizeTable, rhs: SizeTable) -> Bool {
+        // Logging.debug("SizeTable: \(lhs.data.1) == \(rhs.data.1)")
+        return lhs.data.updateTime == rhs.data.updateTime
+    }
+
+    var data: AppState.SizeInfo
+    var body: some View {
+        let _ = Logging.debug("load SizeTable")
+        Table(data.rows) {
+            TableColumn("Size", value: \.sizeStr).width(max: 100)
+            TableColumn("Name") {
+                Text($0.name).truncationMode(.head)
+            }
+        }.id(data.updateTime) // disable reuse table and force reload to avoid diff bug
+    }
+}
+
 struct Wrapper<T: Hashable>: Identifiable {
     var id: T { base }
     var base: T

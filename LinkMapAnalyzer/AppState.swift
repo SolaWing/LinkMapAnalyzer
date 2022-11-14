@@ -40,6 +40,7 @@ class AppState: ObservableObject {
     @Published private var _loading: (() -> Void)? {
         didSet {
             oldValue?()
+            // objectWillChange.send()
         }
     }
     public var isLoading: Bool { _loading != nil }
@@ -79,7 +80,8 @@ class AppState: ObservableObject {
 
     // MARK: Result
     var linkmap: LinkMap?
-    var sizeInfo: ([Row], String)? // row, summary
+    typealias SizeInfo = (rows: [Row], summary: String, updateTime: CFTimeInterval)
+    var sizeInfo: SizeInfo? // row, summary
     struct Row: Identifiable {
         // var id = UUID() // avoid diff and animation crash
         var id: String
@@ -90,7 +92,7 @@ class AppState: ObservableObject {
         }
     }
 
-    nonisolated static func updateOutput(linkmap: LinkMap, query: Query) async -> ([Row], String) {
+    nonisolated static func updateOutput(linkmap: LinkMap, query: Query) async -> SizeInfo {
         let begin = CACurrentMediaTime()
         defer { Logging.info("update output in \(CACurrentMediaTime() - begin)s") }
         let objects = linkmap.indexes.values
@@ -113,8 +115,7 @@ class AppState: ObservableObject {
         }
         rows = rows.sorted(key: { -$0.size })
         let total = rows.map(\.size).reduce(0, +)
-        let sizeInfo = (rows, "总大小：\(AppState.format(num: total))")
-        return sizeInfo
+        return (rows, "总大小：\(AppState.format(num: total))", begin)
     }
 
     nonisolated static func format(num: Int) -> String {
