@@ -97,9 +97,9 @@ struct LinkMap {
         var index: Int
         var path: String
         var symbols: [String: Symbol]
-        var total: Int {
-            symbols.values.map(\.size).reduce(0, +)
-        }
+
+        var total: Int { symbols.values.map(\.size).reduce(0, +) }
+        var name: String { URL(fileURLWithPath: path).lastPathComponent }
     }
     struct Symbol {
         var start: Int

@@ -12,8 +12,8 @@ struct ContentView: View {
     @StateObject var app = AppState()
     var body: some View {
         let _ = Logging.debug("load ContentView")
-        VStack {
-            Picker("选择LinkMap文件。你也可以拖放文件", selection: $app.selectedFile) {
+        VStack(spacing: 8) {
+            Picker("选择LinkMap文件。你也可以拖放文件:", selection: $app.selectedFile) {
                 if app.manualChoose.count > 0 {
                     Section("recent choose") {
                         ForEach(app.manualChoose, id: \.self) { Text($0) }
@@ -23,8 +23,9 @@ struct ContentView: View {
                     ForEach(LinkMap.availableLinkMapFiles(), id: \.self) { Text($0) }
                 }
             }
+            TextField("Query: ", text: $app.query.query)
             HStack {
-                if app.loading != nil { ProgressView().scaleEffect(0.5) }
+                if app.isLoading { ProgressView().scaleEffect(0.5) }
                 if let tip = app.tip { Text(tip.0).foregroundColor(tip.1) }
             }
             if let sizeInfo = app.sizeInfo {
@@ -36,7 +37,8 @@ struct ContentView: View {
                     }
                 }.id(sizeInfo.1) // disable reuse table and force reload to avoid diff bug
                 .frame(minHeight: 240)
-                .padding(.top, 8)
+                // .padding(.top, 8)
+                Spacer()
                 Text(sizeInfo.1)
             } else {
                 Text("""
@@ -44,6 +46,8 @@ struct ContentView: View {
                      1. XCode -> Project -> Build Settings -> Write Link Map File = yes
                      2. choose LinkMap and start analyze
                      """)
+                // .padding(.top, 8)
+                Spacer()
             }
         }
         .padding()
@@ -67,7 +71,6 @@ struct Wrapper<T: Hashable>: Identifiable {
     var base: T
     init(_ base: T) { self.base = base }
 }
-
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
