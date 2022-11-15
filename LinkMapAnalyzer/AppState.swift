@@ -24,17 +24,7 @@ class AppState: ObservableObject {
             if selectedFile == oldValue { return }
             manualChoose.insert(selectedFile, at: 0)
             manualChoose = manualChoose.unique()
-            self.linkmap = nil // 为空时屏蔽其他的loading
-            loading { [self, selectedFile] in
-                let begin = CACurrentMediaTime()
-                let linkmap = try await LinkMap.analyze(path: selectedFile)
-                if Task.isCancelled { return }
-                self.linkmap = linkmap
-                Logging.info("updated path at \(URL(fileURLWithPath: selectedFile).lastPathComponent): analyze: \(CACurrentMediaTime() - begin)s")
-
-                let sizeInfo = await AppState.updateOutput(linkmap: linkmap, query: query)
-                self.sizeInfo = sizeInfo
-            }
+            updateLinkMap()
         }
     }
     @Published private var _loading: (() -> Void)? {
@@ -98,6 +88,20 @@ class AppState: ObservableObject {
         }
     }
 
+    func updateLinkMap() {
+        guard !selectedFile.isEmpty else { return }
+        self.linkmap = nil // 为空时屏蔽其他的loading
+        loading { [self, selectedFile] in
+            let begin = CACurrentMediaTime()
+            let linkmap = try await LinkMap.analyze(path: selectedFile)
+            if Task.isCancelled { return }
+            self.linkmap = linkmap
+            Logging.info("updated path at \(URL(fileURLWithPath: selectedFile).lastPathComponent): analyze: \(CACurrentMediaTime() - begin)s")
+
+            let sizeInfo = await AppState.updateOutput(linkmap: linkmap, query: query)
+            self.sizeInfo = sizeInfo
+        }
+    }
     nonisolated static func updateOutput(linkmap: LinkMap, query: Query) async -> SizeInfo {
         let begin = CACurrentMediaTime()
         defer { Logging.info("update output in \(CACurrentMediaTime() - begin)s") }

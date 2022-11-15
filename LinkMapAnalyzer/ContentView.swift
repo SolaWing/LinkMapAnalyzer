@@ -10,18 +10,22 @@ import UniformTypeIdentifiers
 
 struct ContentView: View {
     @StateObject var app = AppState()
+    // TODO: output copy
     var body: some View {
         let _ = Logging.debug("load ContentView")
         VStack(spacing: 8) {
-            Picker("选择LinkMap文件。你也可以拖放文件:", selection: $app.selectedFile) {
-                if app.manualChoose.count > 0 {
-                    Section("recent choose") {
-                        ForEach(app.manualChoose, id: \.self) { Text($0) }
+            HStack {
+                Picker("选择LinkMap文件。你也可以拖放文件:", selection: $app.selectedFile) {
+                    if app.manualChoose.count > 0 {
+                        Section("recent choose") {
+                            ForEach(app.manualChoose, id: \.self) { Text($0) }
+                        }
+                    }
+                    Section("available") {
+                        ForEach(LinkMap.availableLinkMapFiles(), id: \.self) { Text($0) }
                     }
                 }
-                Section("available") {
-                    ForEach(LinkMap.availableLinkMapFiles(), id: \.self) { Text($0) }
-                }
+                Button("Refresh") { app.updateLinkMap() }
             }
             TextField("Query: ", text: $app.query.query)
             HStack {
