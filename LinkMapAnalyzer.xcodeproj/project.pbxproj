@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		21356A762AC67AF800DE1935 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 21356A782AC67AF800DE1935 /* Localizable.strings */; };
 		21704502291FF79900D7F051 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21704501291FF79900D7F051 /* AppState.swift */; };
 		21704504291FF80800D7F051 /* misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21704503291FF80800D7F051 /* misc.swift */; };
 		2174ACFB291F339100AD694C /* LinkMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2174ACFA291F339100AD694C /* LinkMap.swift */; };
@@ -17,6 +18,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		21356A772AC67AF800DE1935 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		21356A792AC67AFC00DE1935 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		21704501291FF79900D7F051 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		21704503291FF80800D7F051 /* misc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = misc.swift; sourceTree = "<group>"; };
 		2174ACFA291F339100AD694C /* LinkMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkMap.swift; sourceTree = "<group>"; };
@@ -66,6 +69,7 @@
 				21CDBBA7291E71DF00DD1931 /* Assets.xcassets */,
 				21CDBBAC291E71DF00DD1931 /* LinkMapAnalyzer.entitlements */,
 				21CDBBA9291E71DF00DD1931 /* Preview Content */,
+				21356A782AC67AF800DE1935 /* Localizable.strings */,
 			);
 			path = LinkMapAnalyzer;
 			sourceTree = "<group>";
@@ -120,6 +124,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				"zh-Hans",
 				Base,
 			);
 			mainGroup = 21CDBB97291E71DE00DD1931;
@@ -138,6 +143,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				21CDBBAB291E71DF00DD1931 /* Preview Assets.xcassets in Resources */,
+				21356A762AC67AF800DE1935 /* Localizable.strings in Resources */,
 				21CDBBA8291E71DF00DD1931 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -158,6 +164,18 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		21356A782AC67AF800DE1935 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				21356A772AC67AF800DE1935 /* en */,
+				21356A792AC67AFC00DE1935 /* zh-Hans */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		21CDBBAD291E71DF00DD1931 /* Debug */ = {

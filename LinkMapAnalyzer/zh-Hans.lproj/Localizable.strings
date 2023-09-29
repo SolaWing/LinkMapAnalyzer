@@ -1,0 +1,39 @@
+/* No comment provided by engineer. */
+"选择LinkMap文件。你也可以拖放文件:" = "选择LinkMap文件。你也可以拖放文件:";
+
+/* No comment provided by engineer. */
+"available" = "可选列表";
+
+/* No comment provided by engineer. */
+"Category By: " = "分类: ";
+
+/* No comment provided by engineer. */
+"Lib" = "库";
+
+/* No comment provided by engineer. */
+"loading" = "加载中...";
+
+/* No comment provided by engineer. */
+"Name" = "名字";
+
+/* No comment provided by engineer. */
+"Query: " = "查询: ";
+
+/* No comment provided by engineer. */
+"recent choose" = "最近选择";
+
+/* No comment provided by engineer. */
+"Refresh" = "刷新";
+
+/* No comment provided by engineer. */
+"Size" = "体积";
+
+/* No comment provided by engineer. */
+"Total Size: " = "总体积：";
+
+/* No comment provided by engineer. */
+"Usage：\n1. XCode -> Project -> Build Settings -> Write Link Map File = yes\n2. Build With Release Configuration\n3. Choose LinkMap and start analyze" = "使用说明:\n1. XCode -> Project -> Build Settings -> Write Link Map File = yes\n2. 使用Release编译\n3. 选择LinkMap";
+
+"Library" = "库";
+"Object" = "目标文件";
+"Symbol" = "符号";

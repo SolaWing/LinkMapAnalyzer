@@ -31,7 +31,7 @@ struct ContentView: View {
             HStack {
                 Picker("Category By: ", selection: $app.query.category) {
                     ForEach(AppState.Query.Category.allCases) {
-                        Text($0.rawValue.capitalized).tag($0)
+                        Text($0.localizedString).tag($0)
                     }
                 }.pickerStyle(.radioGroup).horizontalRadioGroupLayout()
                 if app.isLoading { ProgressView().scaleEffect(0.5) }

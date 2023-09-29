@@ -39,7 +39,10 @@ class AppState: ObservableObject {
         var query: String = ""
         enum Category: String, CaseIterable, Identifiable {
             case library, object, symbol
-            var id: Self { self  }
+            var id: Self { self }
+            var localizedString: String {
+                NSLocalizedString(rawValue.capitalized, comment: "Category")
+            }
         }
         var category: Category = .library
     }
@@ -64,7 +67,7 @@ class AppState: ObservableObject {
             }
             self._loading = nil
         }
-        tip = ("loading", .gray)
+        tip = (NSLocalizedString("loading", comment: ""), .gray)
         self._loading = { task.cancel() }
     }
 
@@ -128,7 +131,9 @@ class AppState: ObservableObject {
         }
         rows = rows.sorted(key: { -$0.size })
         let total = rows.map(\.size).reduce(0, +)
-        return SizeInfo(rows: rows, summary: "总大小：\(AppState.format(num: total))", updateTime: begin, category: query.category)
+        let tip = NSLocalizedString("Total Size: ", comment: "")
+        let size = AppState.format(num: total)
+        return SizeInfo(rows: rows, summary: tip + size, updateTime: begin, category: query.category)
     }
 
     nonisolated static func format(num: Int) -> String {
