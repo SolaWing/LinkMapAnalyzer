@@ -13,7 +13,7 @@ class AppState: ObservableObject {
     // let objectWillChange = ObservableObjectPublisher()
     var bags = [AnyCancellable]()
     init() {
-        $query.debounce(for: 0.3, scheduler: RunLoop.main).sink { (_) in
+        $query.debounce(for: 0.3, scheduler: RunLoop.main).sink { [unowned self](_) in
             self.updateQuery()
         }.store(in: &bags)
     }
@@ -89,7 +89,7 @@ class AppState: ObservableObject {
     }
 
     func updateLinkMap() {
-        guard !selectedFile.isEmpty else { return }
+        if selectedFile.isEmpty { return }
         self.linkmap = nil // 为空时屏蔽其他的loading
         loading { [self, selectedFile] in
             let begin = CACurrentMediaTime()

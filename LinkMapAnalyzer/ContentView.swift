@@ -46,7 +46,8 @@ struct ContentView: View {
                 Text("""
                      Usage：
                      1. XCode -> Project -> Build Settings -> Write Link Map File = yes
-                     2. choose LinkMap and start analyze
+                     2. Build With Release Configuration
+                     3. Choose LinkMap and start analyze
                      """)
                 // .padding(.top, 8)
                 Spacer()
