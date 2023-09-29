@@ -118,7 +118,7 @@ class AppState: ObservableObject {
         case .symbol:
             rows = objects.flatMap { o in
                 o.symbols.values.map { [lib = o.libraryName](s) in
-                    Row(id: s.name, size: s.size, name: s.name, lib: lib)
+                    Row(id: s.name + o.path, size: s.size, name: s.name, lib: lib)
                 }
             }
         case .library:
